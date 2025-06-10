@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-2xl font-bold mb-6">Class Attendance: {{ class_info[1] }}</h1>
+    <p class="mb-4">Date: {{ class_info[2] }} | Time: {{ class_info[3] }} | Location: {{ class_info[4] }}</p>
+
+    <!-- Record Attendance Form -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-lg font-bold mb-4">Record Attendance</h2>
+        {% if attendees %}
+        <form method="POST">
+            <input type="hidden" name="action" value="record_attendance">
+            <div class="mb-4">
+                <label class="block text-sm font-medium">Attendee</label>
+                <select name="attendee_id" class="w-full border rounded p-2" required>
+                    <option value="">Select an attendee</option>
+                    {% for attendee in attendees %}
+                    <option value="{{ attendee[0] }}">{{ attendee[1] }} ({{ attendee[2] }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium">Time In</label>
+                <input type="time" name="time_in" class="w-full border rounded p-2" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium">Time Out (Optional)</label>
+                <input type="time" name="time_out" class="w-full border rounded p-2">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium">Engagement</label>
+                <input type="text" name="engagement" class="w-full border rounded p-2" placeholder="e.g., Yes, No, Partial">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium">Comments</label>
+                <textarea name="comments" class="w-full border rounded p-2" placeholder="Optional comments"></textarea>
+            </div>
+            <div class="flex justify-end">
+                <button type="submit" class="bg-blue-600 text-white p-2 rounded">Record</button>
+            </div>
+        </form>
+        {% else %}
+        <p class="text-red-600">No attendees assigned to this class. Please assign attendees via Manage Classes.</p>
+        {% endif %}
+    </div>
+
+    <!-- Attendance Records -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-lg font-bold mb-4">Attendance Records</h2>
+        {% if attendance_records %}
+        <table class="w-full border-collapse">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="border p-2">Attendee</th>
+                    <th class="border p-2">Time In</th>
+                    <th class="border p-2">Time Out</th>
+                    <th class="border p-2">Engagement</th>
+                    <th class="border p-2">Comments</th>
+                    <th class="border p-2">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in attendance_records %}
+                <tr>
+                    <td class="border p-2">{{ record[1] }}</td>
+                    <td class="border p-2">{{ record[2] }}</td>
+                    <td class="border p-2">{{ record[3] or 'Not set' }}</td>
+                    <td class="border p-2">{{ record[4] }}</td>
+                    <td class="border p-2">{{ record[5] }}</td>
+                    <td class="border p-2">
+                        <form method="POST" class="inline">
+                            <input type="hidden" name="action" value="update_timeout">
+                            <input type="hidden" name="attendance_id" value="{{ record[0] }}">
+                            <input type="time" name="time_out" class="border rounded p-1 mr-2" required>
+                            <button type="submit" class="bg-blue-600 text-white p-1 rounded">Update Time Out</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No attendance records for this class.</p>
+        {% endif %}
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ url_for('counselor_dashboard') }}" class="bg-gray-300 p-2 rounded">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

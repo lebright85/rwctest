@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-2xl font-bold mb-6">Reports</h1>
+
+    <!-- Filter Form -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-lg font-bold mb-4">Generate Report</h2>
+        <form method="POST">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium">Start Date</label>
+                    <input type="date" name="start_date" value="{{ start_date }}" class="w-full border rounded p-2" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">End Date</label>
+                    <input type="date" name="end_date" value="{{ end_date }}" class="w-full border rounded p-2" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Class</label>
+                    <select name="class_id" class="w-full border rounded p-2">
+                        <option value="all" {% if class_id == 'all' %}selected{% endif %}>All Classes</option>
+                        {% for class in classes %}
+                        <option value="{{ class[0] }}" {% if class_id == class[0]|string %}selected{% endif %}>{{ class[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Attendee</label>
+                    <select name="attendee_id" class="w-full border rounded p-2">
+                        <option value="all" {% if attendee_id == 'all' %}selected{% endif %}>All Attendees</option>
+                        {% for attendee in attendees %}
+                        <option value="{{ attendee[0] }}" {% if attendee_id == attendee[0]|string %}selected{% endif %}>{{ attendee[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Counselor</label>
+                    <select name="counselor_id" class="w-full border rounded p-2">
+                        <option value="all" {% if counselor_id == 'all' %}selected{% endif %}>All Counselors</option>
+                        {% for counselor in counselors %}
+                        <option value="{{ counselor[0] }}" {% if counselor_id == counselor[0]|string %}selected{% endif %}>{{ counselor[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="mt-4 flex justify-end space-x-4">
+                <button type="submit" name="action" value="generate" class="bg-blue-600 text-white p-2 rounded">Generate Report</button>
+                <button type="submit" name="action" value="download_csv" class="bg-green-600 text-white p-2 rounded">Download CSV</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Report Results -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-lg font-bold mb-4">Report Results</h2>
+        {% if report_data %}
+        {% for data in report_data %}
+        <div class="mb-6">
+            <h3 class="text-md font-bold">
+                Class: {{ data.class[1] }} ({{ data.class[2] }}, {{ data.class[3] }}, {{ data.class[4] }}, {{ data.class[5] }})
+            </h3>
+            <p class="text-sm mb-2">Counselor: {{ data.class[6] }}{% if data.class[7] %}, {{ data.class[7] }}{% endif %}</p>
+            <!-- Debug: Show number of attendees -->
+            <p class="text-sm text-gray-500 mb-2">Debug: {{ data.attendees|length }} attendees found</p>
+            {% if data.attendees %}
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="border p-2">Attendee Name</th>
+                        <th class="border p-2">Attendee ID</th>
+                        <th class="border p-2">Group</th>
+                        <th class="border p-2">Time In</th>
+                        <th class="border p-2">Time Out</th>
+                        <th class="border p-2">Engagement</th>
+                        <th class="border p-2">Comments</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attendee in data.attendees %}
+                    <tr>
+                        <td class="border p-2">{{ attendee[0] or 'N/A' }}</td>
+                        <td class="border p-2">{{ attendee[1] or 'N/A' }}</td>
+                        <td class="border p-2">{{ attendee[2] or 'N/A' }}</td>
+                        <td class="border p-2">{{ attendee[4] or 'Not set' }}</td>
+                        <td class="border p-2">{{ attendee[5] or 'Not set' }}</td>
+                        <td class="border p-2">{{ attendee[3] or 'N/A' }}</td>
+                        <td class="border p-2">{{ attendee[6] or 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-red-600">No attendees recorded for this class.</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+        {% else %}
+        <p>No classes found for the selected filters.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
